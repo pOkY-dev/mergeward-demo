@@ -1,0 +1,25 @@
+# Конфіг mergeward для цього репо (Р17) — явний, не лише щоб показати
+# дефолти, а тому що це testbed-репо: хочемо, щоб пороги були видимі й
+# легко покрутити під конкретний тестовий сценарій PR.
+
+enabled_scanners: [gitleaks, semgrep, heuristics]
+
+block_threshold: CRITICAL
+review_threshold: MEDIUM
+
+semgrep_config: p/security-audit
+ai_authorship_tightens_review: true
+
+# Поки що без живих Gemini-креденшлів у цьому репо (мають з'явитись
+# окремо) — false, щоб needs_review одразу йшов на HITL-паузу без спроби
+# LLM-виклику, яка все одно впаде. Переключити на true, коли з'являться
+# GOOGLE_GENAI_USE_VERTEXAI/GOOGLE_CLOUD_PROJECT secrets.
+llm_gray_zone_enabled: false
+llm_model: gemini-2.5-flash
+
+ignore_paths:
+  - "*.lock"
+  - "*/dist/*"
+  - "*/node_modules/*"
+  - "*/vendor/*"
+  - "*.db"

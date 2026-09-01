@@ -1,0 +1,49 @@
+# Резюмить граф, зупинений mergeward.yml на HITL-паузі (Р6), коли людина
+# коментує PR `/approve` чи `/block`. Той самий OWNER-TODO, що й у
+# mergeward.yml.
+on: issue_comment
+
+permissions:
+  pull-requests: write
+  actions: read # download-artifact з ІНШОГО run_id (крос-ран, Р6)
+
+jobs:
+  resume:
+    if: |
+      github.event.issue.pull_request &&
+      (startsWith(github.event.comment.body, '/approve') || startsWith(github.event.comment.body, '/block'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Артефакт живе в ІНШОМУ workflow run (той, що поставив PR на
+      # паузу) — actions/download-artifact вміє качати чужий run, якщо
+      # знати його run_id.
+      - name: Find paused-session run id
+        id: find_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NAME="mergeward-session-pr-${{ github.event.issue.number }}"
+          RUN_ID=$(gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq ".artifacts[] | select(.name == \"$NAME\" and .expired == false) | .workflow_run.id" | head -n1)
+          test -n "$RUN_ID" || { echo "No paused session for this PR." >&2; exit 1; }
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: mergeward-session-pr-${{ github.event.issue.number }}
+          run-id: ${{ steps.find_run.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: .
+
+      - uses: OWNER/mergeward@main
+        with:
+          mode: resume
+        env:
+          GOOGLE_GENAI_USE_VERTEXAI: "true"
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.MERGEWARD_GCP_PROJECT }}
+          GOOGLE_CLOUD_LOCATION: ${{ secrets.MERGEWARD_GCP_LOCATION }}

@@ -1,0 +1,37 @@
+# Стартує mergeward-граф на кожен push у PR (Р6: "перший" з двох
+# workflow — другий, mergeward-resume.yml, резюмить HITL-паузу).
+#
+# TODO перед першим реальним запуском: замінити OWNER на реальний
+# GitHub-акаунт/org, під яким опубліковано репо mergeward (Р14), і
+# закомітити тег/реліз (@v1 чи @main) — цей файл поки що не буде
+# спрацьовувати "з коробки", доки mergeward не запушений на GitHub.
+on: pull_request
+
+permissions:
+  pull-requests: write
+
+jobs:
+  mergeward:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # потрібна повна історія для git diff base..head
+
+      - uses: OWNER/mergeward@main
+        id: mergeward
+        env:
+          # Р4/Р7: Gemini через Google Cloud service account. Порожньо,
+          # доки mergeward.yml:llm_gray_zone_enabled лишається false в
+          # цьому репо — тоді ці secrets не обов'язкові.
+          GOOGLE_GENAI_USE_VERTEXAI: "true"
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.MERGEWARD_GCP_PROJECT }}
+          GOOGLE_CLOUD_LOCATION: ${{ secrets.MERGEWARD_GCP_LOCATION }}
+
+      - name: Upload paused session (Р6, лише коли needs_review)
+        if: steps.mergeward.outputs.outcome == 'needs_review'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mergeward-session-pr-${{ github.event.pull_request.number }}
+          path: mergeward-session.json
+          retention-days: 14
