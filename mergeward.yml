@@ -10,11 +10,12 @@ review_threshold: MEDIUM
 semgrep_config: p/security-audit
 ai_authorship_tightens_review: true
 
-# Поки що без живих Gemini-креденшлів у цьому репо (мають з'явитись
-# окремо) — false, щоб needs_review одразу йшов на HITL-паузу без спроби
-# LLM-виклику, яка все одно впаде. Переключити на true, коли з'являться
-# GOOGLE_GENAI_USE_VERTEXAI/GOOGLE_CLOUD_PROJECT secrets.
-llm_gray_zone_enabled: false
+# Живі Gemini-креденшли підключені (MERGEWARD_GCP_PROJECT/LOCATION/SA_KEY
+# secrets + google-github-actions/auth у workflow YAML) — перевірено
+# локально реальним викликом (Vertex AI, test1-449514) на обох напрямках:
+# false_positive (безпечний curl|sh у CI-only контексті -> auto_pass) і
+# escalate (той самий патерн у production-скрипті -> auto_block).
+llm_gray_zone_enabled: true
 llm_model: gemini-2.5-flash
 
 ignore_paths:

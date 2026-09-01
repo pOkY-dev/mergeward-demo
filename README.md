@@ -43,9 +43,12 @@ tests/
 
 `mergeward.yml` at the root configures the Action for this repo (Р17).
 `.github/workflows/mergeward.yml` + `.github/workflows/mergeward-resume.yml`
-implement the two-workflow HITL pattern (Р6) — **both still reference a
-placeholder `OWNER/mergeward@main`** until the `mergeward` repo is actually
-published on GitHub; update that once it has a real home.
+implement the two-workflow HITL pattern (Р6), pointing at
+[`pOkY-dev/mergeward`](https://github.com/pOkY-dev/mergeward) (action.yml
+lives in its `mergeward/` subfolder, hence the path-qualified
+`pOkY-dev/mergeward/mergeward@main` reference). Gemini access is wired via
+`google-github-actions/auth` + the `MERGEWARD_GCP_PROJECT`/
+`MERGEWARD_GCP_LOCATION`/`MERGEWARD_GCP_SA_KEY` repo secrets.
 
 Planned PR scenarios (mirrors Phase 4 of mergeward's roadmap, run early
 here rather than waiting):

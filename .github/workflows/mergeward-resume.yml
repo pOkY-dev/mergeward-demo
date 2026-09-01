@@ -1,6 +1,5 @@
 # Резюмить граф, зупинений mergeward.yml на HITL-паузі (Р6), коли людина
-# коментує PR `/approve` чи `/block`. Той самий OWNER-TODO, що й у
-# mergeward.yml.
+# коментує PR `/approve` чи `/block`.
 on: issue_comment
 
 permissions:
@@ -40,7 +39,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: .
 
-      - uses: OWNER/mergeward@main
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.MERGEWARD_GCP_SA_KEY }}
+
+      - uses: pOkY-dev/mergeward/mergeward@main
         with:
           mode: resume
         env:
