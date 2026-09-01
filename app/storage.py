@@ -59,6 +59,14 @@ def get_link(db_path: str, slug: str) -> sqlite3.Row | None:
         return row
 
 
+def get_link_stats(db_path: str, slug: str) -> sqlite3.Row | None:
+    """Як get_link(), але без побічного ефекту інкременту clicks — для
+    /api/links/<slug>/stats, де сам перегляд статистики не має рахуватись
+    за клік по посиланню."""
+    with connect(db_path) as conn:
+        return conn.execute("SELECT * FROM links WHERE slug = ?", (slug,)).fetchone()
+
+
 def slug_exists(db_path: str, slug: str) -> bool:
     with connect(db_path) as conn:
         return conn.execute("SELECT 1 FROM links WHERE slug = ?", (slug,)).fetchone() is not None

@@ -68,6 +68,15 @@ def view_paste(paste_id: str):
     return jsonify({"id": row["id"], "content": row["content"], "syntax": row["syntax"]})
 
 
+@bp.get("/api/links/<slug>/stats")
+def link_stats(slug: str):
+    db_path = current_app.config["DATABASE_PATH"]
+    row = storage.get_link_stats(db_path, slug)
+    if row is None:
+        abort(404)
+    return jsonify({"slug": row["slug"], "clicks": row["clicks"], "created_at": row["created_at"]})
+
+
 @bp.get("/api/admin/stats")
 @require_api_key
 def admin_stats():
