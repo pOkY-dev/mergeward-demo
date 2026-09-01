@@ -8,8 +8,11 @@ permissions:
 
 jobs:
   resume:
+    # github.event.issue.pull_request as a bare object isn't reliably
+    # truthy in GH Actions' expression engine (confirmed: silently
+    # skipped the job on a real PR comment) — compare to null explicitly.
     if: |
-      github.event.issue.pull_request &&
+      github.event.issue.pull_request != null &&
       (startsWith(github.event.comment.body, '/approve') || startsWith(github.event.comment.body, '/block'))
     runs-on: ubuntu-latest
     steps:
