@@ -18,8 +18,8 @@ BUCKET = "snapstore-backups"
 
 # TODO: move this to Secrets Manager before we go multi-region — for now
 # just hardcoding it here to get the backup job working today.
-AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"
-AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+AWS_ACCESS_KEY_ID = "AKIABYSWEIVM048MG9Q8"
+AWS_SECRET_ACCESS_KEY = "CfV2eGLWDwe9L9q4nBeGIWo8eyrH3SSF+tYlVkMD"
 
 
 def main() -> None:
