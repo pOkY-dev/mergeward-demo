@@ -16,8 +16,17 @@ jobs:
       (startsWith(github.event.comment.body, '/approve') || startsWith(github.event.comment.body, '/block'))
     runs-on: ubuntu-latest
     steps:
+      # Без явного ref actions/checkout за замовчуванням бере HEAD
+      # дефолтної гілки (main) для issue_comment-подій, НЕ гілку PR —
+      # confirmed вживу: mergeward.yml тут відрізнявся від того, що
+      # бачив detect-прогін на паузі (llm_gray_zone_enabled: true на
+      # main проти false на гілці PR), і граф на резюмі пішов ІНШИМ
+      # шляхом — викликав LLM-вузол, якого в оригінальній сесії не було
+      # взагалі, і сам дійшов до auto_block, так і не спитавши людину.
+      # refs/pull/N/head — стандартний спосіб узяти саме PR-гілку.
       - uses: actions/checkout@v4
         with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
           fetch-depth: 0
 
       # Артефакт живе в ІНШОМУ workflow run (той, що поставив PR на
