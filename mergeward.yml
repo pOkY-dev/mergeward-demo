@@ -10,12 +10,13 @@ review_threshold: MEDIUM
 semgrep_config: p/security-audit
 ai_authorship_tightens_review: true
 
-# Живі Gemini-креденшли підключені (MERGEWARD_GCP_PROJECT/LOCATION/SA_KEY
-# secrets + google-github-actions/auth у workflow YAML) — перевірено
-# локально реальним викликом (Vertex AI, test1-449514) на обох напрямках:
-# false_positive (безпечний curl|sh у CI-only контексті -> auto_pass) і
-# escalate (той самий патерн у production-скрипті -> auto_block).
-llm_gray_zone_enabled: true
+# ТИМЧАСОВО false в цьому PR (test/hitl-pause-resume): реальний Gemini
+# уже двічі підряд коректно ескалував межові curl|sh/eval() кейси до
+# auto_block (Р4 перевірено) — щоб детерміновано протестувати сам
+# HITL pause/resume механізм (Р6) на реальному GitHub PR без залежності
+# від LLM-вердикту, вимикаємо крок 3 саме тут. Повернути на true перед
+# мержем/закриттям цього PR.
+llm_gray_zone_enabled: false
 llm_model: gemini-2.5-flash
 
 ignore_paths:
