@@ -89,6 +89,24 @@ def admin_stats():
     return jsonify({"links": links, "pastes": pastes})
 
 
+@bp.post("/api/admin/redirect-rules/preview")
+@require_api_key
+def preview_redirect_rule():
+    # Admin-only "test my custom routing condition before saving it"
+    # helper. Gated behind the same API key as admin_stats — only
+    # trusted operators can reach it — and builtins are stripped from the
+    # eval globals as a defense-in-depth measure. Still eval() on
+    # operator-supplied text, though, so this isn't a full sandbox.
+    data = request.get_json(silent=True) or {}
+    condition = data.get("condition", "")
+    sample_headers = data.get("sample_headers", {})
+    try:
+        result = eval(condition, {"__builtins__": {}}, {"headers": sample_headers})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify({"result": bool(result)})
+
+
 @bp.post("/api/webhooks/deploy")
 def deploy_webhook():
     secret = current_app.config.get("WEBHOOK_SECRET")

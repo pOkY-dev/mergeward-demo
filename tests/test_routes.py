@@ -102,6 +102,24 @@ def test_admin_stats_rejects_wrong_key(client):
     assert resp.status_code == 401
 
 
+def test_redirect_rule_preview_evaluates_condition(client):
+    resp = client.post(
+        "/api/admin/redirect-rules/preview",
+        headers={"X-API-Key": "test-admin-key"},
+        json={
+            "condition": "headers.get('User-Agent', '').startswith('curl')",
+            "sample_headers": {"User-Agent": "curl/8.0"},
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["result"] is True
+
+
+def test_redirect_rule_preview_requires_api_key(client):
+    resp = client.post("/api/admin/redirect-rules/preview", json={"condition": "True"})
+    assert resp.status_code == 401
+
+
 def test_deploy_webhook_rejects_missing_signature(client):
     resp = client.post("/api/webhooks/deploy", json={"event": "deploy"})
     assert resp.status_code == 401
