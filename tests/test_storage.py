@@ -27,6 +27,19 @@ def test_get_link_increments_clicks(tmp_path):
     assert clicks == 2
 
 
+def test_get_link_stats_does_not_increment_clicks(tmp_path):
+    db_path = str(tmp_path / "t.db")
+    storage.init_db(db_path)
+    storage.create_link(db_path, "abc123", "https://example.com")
+
+    storage.get_link(db_path, "abc123")  # one real click
+    storage.get_link_stats(db_path, "abc123")
+    storage.get_link_stats(db_path, "abc123")
+
+    row = storage.get_link_stats(db_path, "abc123")
+    assert row["clicks"] == 1
+
+
 def test_slug_exists(tmp_path):
     db_path = str(tmp_path / "t.db")
     storage.init_db(db_path)

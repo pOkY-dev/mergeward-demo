@@ -67,6 +67,27 @@ def test_paste_rejects_oversized_content(client):
     assert resp.status_code == 413
 
 
+def test_link_stats_reports_click_count_without_incrementing_it(client):
+    resp = client.post("/api/links", json={"url": "https://example.com"})
+    slug = resp.get_json()["slug"]
+
+    client.get(f"/{slug}", follow_redirects=False)  # one real click
+    client.get(f"/{slug}", follow_redirects=False)  # two real clicks
+
+    stats = client.get(f"/api/links/{slug}/stats")
+    assert stats.status_code == 200
+    assert stats.get_json()["clicks"] == 2
+
+    # Viewing stats again must not itself count as a click.
+    stats_again = client.get(f"/api/links/{slug}/stats")
+    assert stats_again.get_json()["clicks"] == 2
+
+
+def test_link_stats_unknown_slug_404(client):
+    resp = client.get("/api/links/does-not-exist/stats")
+    assert resp.status_code == 404
+
+
 def test_admin_stats_requires_api_key(client):
     resp = client.get("/api/admin/stats")
     assert resp.status_code == 401
